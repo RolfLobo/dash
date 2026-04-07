@@ -48,15 +48,54 @@ CANCELLATION_REASONS = [
 
 # Company name parts for realistic generation
 PREFIXES = [
-    "Apex", "Bright", "Cloud", "Data", "Edge", "Flow", "Grid", "Hub",
-    "Iris", "Jet", "Kite", "Loom", "Meta", "Nova", "Orbit", "Pulse",
-    "Quark", "Rise", "Sync", "Trace", "Unity", "Vibe", "Wave", "Xenon",
-    "Yield", "Zen", "Atlas", "Beacon", "Craft", "Drift",
+    "Apex",
+    "Bright",
+    "Cloud",
+    "Data",
+    "Edge",
+    "Flow",
+    "Grid",
+    "Hub",
+    "Iris",
+    "Jet",
+    "Kite",
+    "Loom",
+    "Meta",
+    "Nova",
+    "Orbit",
+    "Pulse",
+    "Quark",
+    "Rise",
+    "Sync",
+    "Trace",
+    "Unity",
+    "Vibe",
+    "Wave",
+    "Xenon",
+    "Yield",
+    "Zen",
+    "Atlas",
+    "Beacon",
+    "Craft",
+    "Drift",
 ]
 SUFFIXES = [
-    "Labs", "AI", "Tech", "Systems", "IO", "HQ", "Works", "Co",
-    "Analytics", "Cloud", "Digital", "Solutions", "Group", "Inc",
-    "Software", "Dynamics",
+    "Labs",
+    "AI",
+    "Tech",
+    "Systems",
+    "IO",
+    "HQ",
+    "Works",
+    "Co",
+    "Analytics",
+    "Cloud",
+    "Digital",
+    "Solutions",
+    "Group",
+    "Inc",
+    "Software",
+    "Dynamics",
 ]
 
 
@@ -127,8 +166,30 @@ def generate(seed: int = 42) -> dict[str, pd.DataFrame]:
 
     # Monthly new customer counts (growth curve)
     monthly_new = [
-        15, 18, 20, 22, 25, 28, 22, 30, 35, 32, 28, 40,  # 2024
-        38, 42, 45, 40, 48, 50, 45, 52, 55, 50, 48, 60,  # 2025
+        15,
+        18,
+        20,
+        22,
+        25,
+        28,
+        22,
+        30,
+        35,
+        32,
+        28,
+        40,  # 2024
+        38,
+        42,
+        45,
+        40,
+        48,
+        50,
+        45,
+        52,
+        55,
+        50,
+        48,
+        60,  # 2025
     ]
 
     # Track active subscriptions for churn simulation
@@ -152,16 +213,18 @@ def generate(seed: int = 42) -> dict[str, pd.DataFrame]:
 
             # 10% of new customers start as trial
             is_trial = rng.random() < 0.10
-            customers.append({
-                "id": cust_id,
-                "company_name": _company_name(rng, used_names),
-                "industry": rng.choice(INDUSTRIES),
-                "company_size": size,
-                "country": rng.choice(COUNTRIES),
-                "signup_date": signup,
-                "source": rng.choice(SOURCES),
-                "status": "trial" if is_trial else "active",
-            })
+            customers.append(
+                {
+                    "id": cust_id,
+                    "company_name": _company_name(rng, used_names),
+                    "industry": rng.choice(INDUSTRIES),
+                    "company_size": size,
+                    "country": rng.choice(COUNTRIES),
+                    "signup_date": signup,
+                    "source": rng.choice(SOURCES),
+                    "status": "trial" if is_trial else "active",
+                }
+            )
 
             plan_info = PLANS[plan]
             seats = rng.randint(*plan_info["seats"])
@@ -171,18 +234,20 @@ def generate(seed: int = 42) -> dict[str, pd.DataFrame]:
 
             sub_id += 1
             billing = rng.choices(["monthly", "annual"], weights=[0.65, 0.35])[0]
-            subscriptions.append({
-                "id": sub_id,
-                "customer_id": cust_id,
-                "plan": plan,
-                "mrr": mrr,
-                "seats": seats,
-                "billing_cycle": billing,
-                "started_at": datetime.combine(signup, datetime.min.time()),
-                "ended_at": None,
-                "status": "active",
-                "cancellation_reason": None,
-            })
+            subscriptions.append(
+                {
+                    "id": sub_id,
+                    "customer_id": cust_id,
+                    "plan": plan,
+                    "mrr": mrr,
+                    "seats": seats,
+                    "billing_cycle": billing,
+                    "started_at": datetime.combine(signup, datetime.min.time()),
+                    "ended_at": None,
+                    "status": "active",
+                    "cancellation_reason": None,
+                }
+            )
 
             active_subs[cust_id] = {
                 "sub_id": sub_id,
@@ -216,21 +281,21 @@ def generate(seed: int = 42) -> dict[str, pd.DataFrame]:
             # Sample 3-5 days per month for usage metrics
             for _ in range(rng.randint(3, 5)):
                 usage_day = _random_date_in_month(rng, year, month)
-                usage_metrics.append({
-                    "customer_id": cid,
-                    "metric_date": usage_day,
-                    "api_calls": int(api_calls * rng.uniform(0.7, 1.3) / 5),
-                    "active_users": max(1, active_users + rng.randint(-2, 2)),
-                    "storage_mb": round(storage * rng.uniform(0.95, 1.05), 2),
-                    "reports_generated": max(0, reports + rng.randint(-3, 3)),
-                    "integrations_active": rng.randint(1, min(8, info["seats"])),
-                })
+                usage_metrics.append(
+                    {
+                        "customer_id": cid,
+                        "metric_date": usage_day,
+                        "api_calls": int(api_calls * rng.uniform(0.7, 1.3) / 5),
+                        "active_users": max(1, active_users + rng.randint(-2, 2)),
+                        "storage_mb": round(storage * rng.uniform(0.95, 1.05), 2),
+                        "reports_generated": max(0, reports + rng.randint(-3, 3)),
+                        "integrations_active": rng.randint(1, min(8, info["seats"])),
+                    }
+                )
 
             # Invoice generation (monthly billing or annual renewal month)
             billing = info["billing_cycle"]
-            generate_invoice = billing == "monthly" or (
-                billing == "annual" and month == info["signup"].month
-            )
+            generate_invoice = billing == "monthly" or (billing == "annual" and month == info["signup"].month)
             if generate_invoice:
                 invoice_id += 1
                 amount = info["mrr"] if billing == "monthly" else info["mrr"] * 12 * 0.9  # 10% annual discount
@@ -245,19 +310,22 @@ def generate(seed: int = 42) -> dict[str, pd.DataFrame]:
                 else:
                     inv_status = "paid"
                 paid_ok = inv_status == "paid"
-                invoices.append({
-                    "id": invoice_id,
-                    "customer_id": cid,
-                    "subscription_id": info["sub_id"],
-                    "amount": round(amount, 2),
-                    "currency": "USD",
-                    "status": inv_status,
-                    "issued_at": datetime.combine(issued, datetime.min.time()),
-                    "paid_at": datetime.combine(issued + timedelta(days=rng.randint(0, 5)),
-                                                datetime.min.time()) if paid_ok else None,
-                    "period_start": month_start,
-                    "period_end": month_end,
-                })
+                invoices.append(
+                    {
+                        "id": invoice_id,
+                        "customer_id": cid,
+                        "subscription_id": info["sub_id"],
+                        "amount": round(amount, 2),
+                        "currency": "USD",
+                        "status": inv_status,
+                        "issued_at": datetime.combine(issued, datetime.min.time()),
+                        "paid_at": datetime.combine(issued + timedelta(days=rng.randint(0, 5)), datetime.min.time())
+                        if paid_ok
+                        else None,
+                        "period_start": month_start,
+                        "period_end": month_end,
+                    }
+                )
 
             # Support tickets (more tickets for lower plans / lower usage)
             ticket_prob = {"starter": 0.15, "professional": 0.10, "business": 0.08, "enterprise": 0.12}
@@ -271,17 +339,20 @@ def generate(seed: int = 42) -> dict[str, pd.DataFrame]:
                     ticket_status = "closed" if rng.random() < 0.7 else "resolved"
                 else:
                     ticket_status = rng.choice(["open", "in_progress"])
-                support_tickets.append({
-                    "id": ticket_id,
-                    "customer_id": cid,
-                    "priority": rng.choice(TICKET_PRIORITIES),
-                    "category": rng.choice(TICKET_CATEGORIES),
-                    "status": ticket_status,
-                    "created_at": datetime.combine(created, datetime.min.time()),
-                    "resolved_at": datetime.combine(created + timedelta(days=resolve_days),
-                                                    datetime.min.time()) if resolve_days is not None else None,
-                    "satisfaction_score": rng.randint(1, 5) if resolved and rng.random() > 0.3 else None,
-                })
+                support_tickets.append(
+                    {
+                        "id": ticket_id,
+                        "customer_id": cid,
+                        "priority": rng.choice(TICKET_PRIORITIES),
+                        "category": rng.choice(TICKET_CATEGORIES),
+                        "status": ticket_status,
+                        "created_at": datetime.combine(created, datetime.min.time()),
+                        "resolved_at": datetime.combine(created + timedelta(days=resolve_days), datetime.min.time())
+                        if resolve_days is not None
+                        else None,
+                        "satisfaction_score": rng.randint(1, 5) if resolved and rng.random() > 0.3 else None,
+                    }
+                )
 
             # Churn check
             churn_p = _churn_probability(info["plan"], usage_ratio)
@@ -304,15 +375,17 @@ def generate(seed: int = 42) -> dict[str, pd.DataFrame]:
                         c["status"] = "churned"
                         break
                 # Plan change record
-                plan_changes.append({
-                    "customer_id": cid,
-                    "previous_plan": info["plan"],
-                    "new_plan": None,
-                    "previous_mrr": info["mrr"],
-                    "new_mrr": 0,
-                    "change_type": "cancellation",
-                    "changed_at": datetime.combine(churn_date, datetime.min.time()),
-                })
+                plan_changes.append(
+                    {
+                        "customer_id": cid,
+                        "previous_plan": info["plan"],
+                        "new_plan": None,
+                        "previous_mrr": info["mrr"],
+                        "new_mrr": 0,
+                        "change_type": "cancellation",
+                        "changed_at": datetime.combine(churn_date, datetime.min.time()),
+                    }
+                )
                 churned_this_month.append(cid)
                 continue
 
@@ -332,8 +405,10 @@ def generate(seed: int = 42) -> dict[str, pd.DataFrame]:
 
                 new_plan_info = PLANS[new_plan]
                 new_seats = rng.randint(*new_plan_info["seats"])
-                new_mrr = round(new_plan_info["base_mrr"] * max(1, new_seats // new_plan_info["seats"][0])
-                                * rng.uniform(0.9, 1.1), 2)
+                new_mrr = round(
+                    new_plan_info["base_mrr"] * max(1, new_seats // new_plan_info["seats"][0]) * rng.uniform(0.9, 1.1),
+                    2,
+                )
                 change_date = _random_date_in_month(rng, year, month)
 
                 # End current subscription
@@ -345,28 +420,32 @@ def generate(seed: int = 42) -> dict[str, pd.DataFrame]:
 
                 # Create new subscription
                 sub_id += 1
-                subscriptions.append({
-                    "id": sub_id,
-                    "customer_id": cid,
-                    "plan": new_plan,
-                    "mrr": new_mrr,
-                    "seats": new_seats,
-                    "billing_cycle": info["billing_cycle"],
-                    "started_at": datetime.combine(change_date, datetime.min.time()),
-                    "ended_at": None,
-                    "status": "active",
-                    "cancellation_reason": None,
-                })
+                subscriptions.append(
+                    {
+                        "id": sub_id,
+                        "customer_id": cid,
+                        "plan": new_plan,
+                        "mrr": new_mrr,
+                        "seats": new_seats,
+                        "billing_cycle": info["billing_cycle"],
+                        "started_at": datetime.combine(change_date, datetime.min.time()),
+                        "ended_at": None,
+                        "status": "active",
+                        "cancellation_reason": None,
+                    }
+                )
 
-                plan_changes.append({
-                    "customer_id": cid,
-                    "previous_plan": info["plan"],
-                    "new_plan": new_plan,
-                    "previous_mrr": info["mrr"],
-                    "new_mrr": new_mrr,
-                    "change_type": change_type,
-                    "changed_at": datetime.combine(change_date, datetime.min.time()),
-                })
+                plan_changes.append(
+                    {
+                        "customer_id": cid,
+                        "previous_plan": info["plan"],
+                        "new_plan": new_plan,
+                        "previous_mrr": info["mrr"],
+                        "new_mrr": new_mrr,
+                        "change_type": change_type,
+                        "changed_at": datetime.combine(change_date, datetime.min.time()),
+                    }
+                )
 
                 # Update active sub tracking
                 active_subs[cid] = {
@@ -408,8 +487,7 @@ def load_data(seed: int = 42, drop: bool = False) -> None:
     if drop:
         print("Dropping existing tables...")
         with engine.connect() as conn:
-            for table in ["usage_metrics", "support_tickets", "invoices",
-                          "plan_changes", "subscriptions", "customers"]:
+            for table in ["usage_metrics", "support_tickets", "invoices", "plan_changes", "subscriptions", "customers"]:
                 conn.execute(text(f"DROP TABLE IF EXISTS {table} CASCADE"))
             conn.commit()
 

@@ -8,7 +8,7 @@ the semantic model and business rules into its prompt.
 """
 
 from dash.context.business_rules import build_business_context
-from dash.context.semantic_model import format_semantic_model, build_semantic_model
+from dash.context.semantic_model import build_semantic_model, format_semantic_model
 
 # ---------------------------------------------------------------------------
 # Leader
