@@ -355,7 +355,7 @@ Production deployments require authentication via [Agno AgentOS](https://docs.ag
 
 Local development (`RUNTIME_ENV=dev`, set by Docker Compose) runs without auth so you can iterate freely.
 
-### Setup
+### Auth Setup
 
 See [Deploy to Railway](#deploy-to-railway) for the full setup flow, including how to get your `JWT_VERIFICATION_KEY` from AgentOS. The Agno control plane handles JWT issuance, session management, traces, metrics, and the web UI. See the [AgentOS Security docs](https://docs.agno.com/agent-os/security/overview?utm_source=github&utm_medium=example-repo&utm_campaign=agent-example&utm_content=dash&utm_term=security) for details.
 
