@@ -162,6 +162,10 @@ See [docs/SLACK_CONNECT.md](docs/SLACK_CONNECT.md) for the full setup guide with
 **Local development**: use [ngrok](https://ngrok.com/download/mac-os) to get a public URL:
 
 ```sh
+# Docker Compose (Quick Start)
+ngrok http 8000
+
+# Bare AgentOS (python -m app.main)
 ngrok http 7777
 ```
 
