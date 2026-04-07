@@ -1,6 +1,6 @@
 # Dash
 
-A **self-learning data agent** that lives in slack. It grounds answers in 6 layers of context and improves with every query. Chat with Dash via Slack or the [AgentOS](https://os.agno.com) web UI.
+A **self-learning data agent** that delivers insights, not just SQL results. It grounds answers in 6 layers of context and improves with every query. Chat with Dash via Slack, the terminal, or the [AgentOS](https://os.agno.com) web UI.
 
 > Inspired by [OpenAI's in-house data agent](https://openai.com/index/inside-our-in-house-data-agent/).
 
@@ -108,7 +108,7 @@ The agent retrieves relevant context at query time via hybrid search, then gener
 
 ## The Self-Learning Loop
 
-Dash improves without retraining or fine-tuning. We call this gpu-poor continuous learning.
+Dash improves without retraining or fine-tuning.
 
 It learns through two complementary systems:
 
@@ -298,7 +298,8 @@ python scripts/load_knowledge.py --recreate  # Fresh start
 docker compose up -d dash-db
 python scripts/generate_data.py
 python scripts/load_knowledge.py
-python -m dash  # CLI mode
+python -m dash            # CLI mode
+python -m app.main        # AgentOS mode (web UI at os.agno.com)
 ```
 
 ## Architecture

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Dash is a self-learning data agent that delivers **insights, not just SQL results**. It uses a team of specialists (Analyst + Engineer) coordinated by a leader to handle data queries and build computed data assets. Built on Agno. Runs in Slack, the terminal, or the AgentOS web UI.
+Dash is a self-learning data agent that delivers **insights, not just SQL results**. It uses a team of specialists (Analyst + Engineer) coordinated by a leader to handle data queries and build computed data assets. Built on [Agno](https://docs.agno.com). Runs in Slack, the terminal, or the [AgentOS](https://os.agno.com) web UI.
 
 ## Structure
 
@@ -12,6 +12,7 @@ dash/
 ├── settings.py            # Shared config (DB, model, knowledge bases, Slack)
 ├── instructions.py        # Instruction builders per agent role
 ├── paths.py               # Path constants
+├── __main__.py            # CLI entry point (python -m dash)
 ├── agents/
 │   ├── analyst.py         # SQL queries, data analysis, insights (read-only)
 │   └── engineer.py        # Views, summary tables, computed data (dash schema)
@@ -34,6 +35,7 @@ app/
 └── config.yaml            # Quick prompts
 
 db/
+├── __init__.py            # Re-exports: db_url, get_postgres_db, get_sql_engine, etc.
 ├── session.py             # PostgreSQL + PgVector + dual schema (public/dash)
 └── url.py                 # Database URL builder
 
@@ -43,28 +45,33 @@ evals/                     # Evaluation framework (Agno eval classes)
     ├── accuracy.py        # AccuracyEval — data correctness
     ├── routing.py         # ReliabilityEval — team routes correctly
     ├── security.py        # AgentAsJudgeEval — no credential leaks
-    └── governance.py      # AgentAsJudgeEval — refuses destructive SQL
+    ├── governance.py      # AgentAsJudgeEval — refuses destructive SQL
+    └── boundaries.py      # AgentAsJudgeEval — schema access boundaries
 
 scripts/
 ├── generate_data.py       # Generate SaaS sample data
 ├── load_knowledge.py      # Load knowledge into vector DB
+├── venv_setup.sh          # Create virtualenv (uses uv)
+├── format.sh              # ruff format + import sorting
+├── validate.sh            # ruff check + mypy
+├── generate_requirements.sh # uv pip compile → requirements.txt
+├── build_image.sh         # Multi-platform Docker build
+├── entrypoint.sh          # Docker entrypoint (DB wait, banner)
 ├── railway_up.sh          # First-time Railway setup
 ├── railway_redeploy.sh    # Redeploy to Railway
-├── railway_env.sh         # Sync .env.production to Railway
-├── venv_setup.sh          # Create virtualenv
-├── format.sh              # Format code
-└── validate.sh            # Lint + type check
+└── railway_env.sh         # Sync .env.production to Railway
 
 docs/
-└── SLACK_CONNECT.md       # Slack app setup guide with manifest
+├── SLACK_CONNECT.md       # Slack app setup guide with manifest
+└── TEST_QUESTIONS.md      # Manual test questions (routing, data quality, edge cases)
 ```
 
 ## Commands
 
 ```bash
 ./scripts/venv_setup.sh && source .venv/bin/activate
-./scripts/format.sh      # Format code
-./scripts/validate.sh    # Lint + type check
+./scripts/format.sh      # Format code (ruff format + isort)
+./scripts/validate.sh    # Lint + type check (ruff + mypy)
 python -m dash           # CLI mode
 python -m dash.team      # Test mode (runs sample queries)
 
@@ -81,6 +88,10 @@ python -m evals --verbose            # Show response details
 ./scripts/railway_up.sh              # First-time Railway setup
 ./scripts/railway_redeploy.sh        # Redeploy
 ./scripts/railway_env.sh             # Sync .env.production to Railway
+
+# Dependencies
+./scripts/generate_requirements.sh           # Regenerate requirements.txt
+./scripts/generate_requirements.sh upgrade   # Regenerate with latest versions
 ```
 
 ## Architecture
@@ -156,4 +167,22 @@ Five eval categories using Agno's eval framework:
 | `SLACK_SIGNING_SECRET` | No | Slack signing secret (interface only) |
 | `DB_*` | No | Database config (defaults work with Docker Compose) |
 | `RUNTIME_ENV` | No | `dev` (hot reload) or `prd` (RBAC enabled) |
+| `AGENTOS_URL` | No | Scheduler callback URL (defaults to `http://127.0.0.1:8000`) |
 | `JWT_VERIFICATION_KEY` | No | Production RBAC (from os.agno.com) |
+
+## Tooling
+
+- **Python 3.12** (required)
+- **uv** — package manager (venv creation, dependency resolution, pip compile)
+- **ruff** — linting and formatting (line-length 120)
+- **mypy** — type checking (strict-ish: `check_untyped_defs`, `no_implicit_optional`)
+- **CI** — GitHub Actions (`.github/workflows/validate.yml`): ruff format check, ruff lint, mypy on every push/PR to main
+
+## Key Patterns
+
+- **Tool factories**: Tools use a closure pattern (`create_*_tool(knowledge)` in `dash/tools/`) — the outer function captures dependencies, the inner `@tool` function is what the agent calls.
+- **Instruction composition**: `dash/instructions.py` builds prompts dynamically by concatenating role instructions + semantic model + business context. Leader instructions add/swap Slack sections based on config.
+- **Dual knowledge**: `dash_knowledge` (curated: table schemas, queries, rules) vs `dash_learnings` (discovered: error patterns, gotchas). Both are PgVector with hybrid search. The leader only gets learnings; specialists get knowledge.
+- **DB re-exports**: `db/__init__.py` re-exports everything from `db.session` and `db.url`. Import from `db` directly (e.g., `from db import get_sql_engine`).
+- **Schema enforcement**: Analyst read-only is enforced at the PostgreSQL level (`default_transaction_read_only`). Engineer public-schema writes are blocked by a SQLAlchemy `before_cursor_execute` event listener + regex guard.
+- **Eval categories**: Registered in `evals/__init__.py` as a dict mapping name → module path + runner type. Adding a new eval category means adding a case file and a registry entry.

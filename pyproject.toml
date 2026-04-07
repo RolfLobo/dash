@@ -1,7 +1,7 @@
 [project]
 name = "dash"
 version = "1.0.0"
-description = "A self-learning data agent that lives in slack"
+description = "A self-learning data agent that delivers insights, not just SQL results"
 requires-python = ">=3.12,<4"
 readme = "README.md"
 license-files = ["LICENSE"]
@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["mypy", "ruff"]
+dev = ["mypy", "python-dotenv", "ruff"]
 
 [build-system]
 requires = ["setuptools"]
@@ -43,7 +43,7 @@ plugins = ["pydantic.mypy"]
 exclude = [".venv*"]
 
 [[tool.mypy.overrides]]
-module = ["pgvector.*", "setuptools.*", "agno.*", "pandas.*", "httpx.*", "mcp.*", "slack_sdk.*", "sqlalchemy.*"]
+module = ["pgvector.*", "setuptools.*", "agno.*", "pandas.*", "httpx.*", "mcp.*", "openai.*", "slack_sdk.*", "sqlalchemy.*"]
 ignore_missing_imports = true
 
 [tool.uv.pip]

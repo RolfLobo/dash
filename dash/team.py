@@ -15,7 +15,7 @@ from agno.team import Team, TeamMode
 from dash.agents.analyst import analyst
 from dash.agents.engineer import engineer
 from dash.instructions import build_leader_instructions
-from dash.settings import MODEL, SLACK_TOKEN, agent_db, dash_learning, dash_learnings
+from dash.settings import MODEL, SLACK_TOKEN, agent_db, dash_learning
 
 # ---------------------------------------------------------------------------
 # Team Leader Tools (Slack — leader-only)
