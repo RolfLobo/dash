@@ -50,8 +50,6 @@ dash = Team(
     tools=leader_tools,
     # Leader only needs learnings for context (error patterns, gotchas).
     # Curated knowledge (SQL, table metadata) is for the specialists.
-    knowledge=dash_learnings,
-    search_knowledge=True,
     learning=dash_learning,
     add_learnings_to_context=True,
     # Member coordination
